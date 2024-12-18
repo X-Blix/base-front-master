@@ -3,7 +3,7 @@
 
     <!-- 工具条 -->
     <div class="tools-div">
-      <el-button type="success" icon="el-icon-plus" size="mini" @click="add()">添 加</el-button>
+      <el-button type="success" icon="el-icon-plus" :disabled="$hasBP('bnt.sysDept.add')  === false" size="mini" @click="add()">添 加</el-button>
     </div>
 
     <el-table
@@ -40,8 +40,15 @@
       <el-table-column label="操作" width="180" align="center" fixed="right">
         <template slot-scope="scope">
           <el-button v-if="scope.row.type !== 2" type="success" icon="el-icon-plus" size="mini" title="添加下级部门" @click="add(scope.row)" />
-          <el-button type="primary" icon="el-icon-edit" size="mini" title="修改" @click="edit(scope.row)" />
-          <el-button type="danger" icon="el-icon-delete" size="mini" title="删除" :disabled="scope.row.children.length > 0" @click="removeDataById(scope.row.id)" />
+          <el-button type="primary" icon="el-icon-edit" size="mini" :disabled="$hasBP('bnt.sysDept.update')  === false" @click="edit(scope.row)" title="修改"/>
+          <el-button
+                    type="danger"
+                    icon="el-icon-delete"
+                    size="mini"
+                    :disabled="$hasBP('bnt.sysDept.remove')  === false || scope.row.children.length > 0 "
+                    @click="removeDataById(scope.row.id)"
+                    title="删除"
+          />
         </template>
       </el-table-column>
     </el-table>

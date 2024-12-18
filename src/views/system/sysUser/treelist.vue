@@ -31,101 +31,118 @@
 
     <!-- 工具条 -->
     <div class="tools-div">
-      <el-button type="success" :disabled="$hasBP('bnt.sysUser.add')  === false" icon="el-icon-plus" size="mini"
-                 @click="add">添 加
+      <el-button
+        type="success"
+        :disabled="$hasBP('bnt.sysUser.add') === false"
+        icon="el-icon-plus"
+        size="mini"
+        @click="add"
+      >添 加
       </el-button>
-    <!-- 列表 -->
-    <el-table
-      v-loading="listLoading"
-      :data="list"
-      stripe
-      border
-      style="width: 100%;margin-top: 10px;"
-    >
-
-      <el-table-column
-        label="序号"
-        width="70"
-        align="center"
+      <!-- 列表 -->
+      <el-table
+        v-loading="listLoading"
+        :data="list"
+        stripe
+        border
+        style="width: 100%;margin-top: 10px;"
       >
-        <template slot-scope="scope">
-          {{ (page - 1) * limit + scope.$index + 1 }}
-        </template>
-      </el-table-column>
 
-      <el-table-column prop="username" label="用户名" width="180" />
-      <el-table-column prop="name" label="姓名" width="110" />
-      <el-table-column prop="phone" label="手机" />
-      <el-table-column label="状态" width="80">
-        <template slot-scope="scope">
-          <!--          如果出现报错可以无视掉-->
-          <el-switch
-            :value="scope.row.status===1"
-            @change="switchStatus(scope.row)"
-          />
-        </template>
-      </el-table-column>
-      <el-table-column prop="createTime" label="创建时间" />
+        <el-table-column
+          label="序号"
+          width="70"
+          align="center"
+        >
+          <template slot-scope="scope">
+            {{ (page - 1) * limit + scope.$index + 1 }}
+          </template>
+        </el-table-column>
 
-      <el-table-column label="操作" align="center" fixed="right">
-        <template slot-scope="scope">
-          <el-button type="primary" icon="el-icon-edit" size="mini" title="修改" @click="edit(scope.row.id)" />
-          <el-button type="danger" icon="el-icon-delete" size="mini" title="删除" @click="removeDataById(scope.row.id)" />
-          <el-button type="warning" icon="el-icon-baseball" size="mini" title="分配角色" @click="showAssignRole(scope.row)" />
-        </template>
-      </el-table-column>
-    </el-table>
+        <el-table-column prop="username" label="用户名" width="180" />
+        <el-table-column prop="name" label="姓名" width="110" />
+        <el-table-column prop="phone" label="手机" />
+        <el-table-column label="状态" width="80">
+          <template slot-scope="scope">
+            <!--          如果出现报错可以无视掉-->
+            <el-switch
+              :value="scope.row.status===1"
+              @change="switchStatus(scope.row)"
+            />
+          </template>
+        </el-table-column>
+        <el-table-column prop="createTime" label="创建时间" />
 
-    <!-- 分页组件 -->
-    <el-pagination
-      :current-page="page"
-      :total="total"
-      :page-size="limit"
-      style="padding: 30px 0; text-align: center;"
-      layout="total, prev, pager, next, jumper"
-      @current-change="fetchData"
-    />
+        <el-table-column label="操作" align="center" fixed="right">
+          <template slot-scope="scope">
+            <el-button type="primary" :disabled="$hasBP('bnt.sysUser.update')  === false" icon="el-icon-edit" size="mini" @click="edit(scope.row.id)" title="修改"/>
+            <el-button
+                        type="danger"
+                        icon="el-icon-delete"
+                        size="mini"
+                        @click="removeDataById(scope.row.id)"
+                        :disabled="$hasBP('bnt.sysUser.remove')  === false"
+                        title="删除"/>
+            <el-button
+                      type="warning"
+                      icon="el-icon-baseball"
+                      size="mini"
+                      @click="showAssignRole(scope.row)"
+                      :disabled="$hasBP('bnt.sysUser.update')  === false"
+                      title="分配角色"/>
+          </template>
+        </el-table-column>
+      </el-table>
 
-    <el-dialog title="分配角色" :visible.sync="dialogRoleVisible">
-      <el-form label-width="80px">
-        <el-form-item label="用户名">
-          <el-input disabled :value="sysUser.username" />
-        </el-form-item>
-        <el-form-item label="角色列表">
-          <el-checkbox v-model="checkAll" :indeterminate="isIndeterminate" @change="handleCheckAllChange">全选
-          </el-checkbox>
-          <div style="margin: 15px 0;" />
-          <el-checkbox-group v-model="userRoleIds" @change="handleCheckedChange">
-            <el-checkbox v-for="role in allRoles" :key="role.id" :label="role.id">{{ role.roleName }}</el-checkbox>
-          </el-checkbox-group>
-        </el-form-item>
-      </el-form>
-      <div slot="footer">
-        <el-button type="primary" size="small" @click="assignRole">保存</el-button>
-        <el-button size="small" @click="dialogRoleVisible = false">取消</el-button>
-      </div>
-    </el-dialog>
-    <el-dialog title="添加/修改" :visible.sync="dialogVisible" width="40%">
-      <el-form ref="dataForm" :model="sysUser" label-width="100px" size="small" style="padding-right: 40px;">
-        <el-form-item label="用户名" prop="username">
-          <el-input v-model="sysUser.username" />
-        </el-form-item>
-        <el-form-item v-if="!sysUser.id" label="密码" prop="password">
-          <el-input v-model="sysUser.password" type="password" />
-        </el-form-item>
-        <el-form-item label="姓名" prop="name">
-          <el-input v-model="sysUser.name" />
-        </el-form-item>
-        <el-form-item label="手机" prop="phone">
-          <el-input v-model="sysUser.phone" />
-        </el-form-item>
-      </el-form>
-      <span slot="footer" class="dialog-footer">
-        <el-button size="small" icon="el-icon-refresh-right" @click="dialogVisible = false">取 消</el-button>
-        <el-button type="primary" icon="el-icon-check" size="small" @click="saveOrUpdate()">确 定</el-button>
-      </span>
-    </el-dialog>
-  </div>
+      <!-- 分页组件 -->
+      <el-pagination
+        :current-page="page"
+        :total="total"
+        :page-size="limit"
+        style="padding: 30px 0; text-align: center;"
+        layout="total, prev, pager, next, jumper"
+        @current-change="fetchData"
+      />
+
+      <el-dialog title="分配角色" :visible.sync="dialogRoleVisible">
+        <el-form label-width="80px">
+          <el-form-item label="用户名">
+            <el-input disabled :value="sysUser.username" />
+          </el-form-item>
+          <el-form-item label="角色列表">
+            <el-checkbox v-model="checkAll" :indeterminate="isIndeterminate" @change="handleCheckAllChange">全选
+            </el-checkbox>
+            <div style="margin: 15px 0;" />
+            <el-checkbox-group v-model="userRoleIds" @change="handleCheckedChange">
+              <el-checkbox v-for="role in allRoles" :key="role.id" :label="role.id">{{ role.roleName }}</el-checkbox>
+            </el-checkbox-group>
+          </el-form-item>
+        </el-form>
+        <div slot="footer">
+          <el-button type="primary" size="small" @click="assignRole">保存</el-button>
+          <el-button size="small" @click="dialogRoleVisible = false">取消</el-button>
+        </div>
+      </el-dialog>
+      <el-dialog title="添加/修改" :visible.sync="dialogVisible" width="40%">
+        <el-form ref="dataForm" :model="sysUser" label-width="100px" size="small" style="padding-right: 40px;">
+          <el-form-item label="用户名" prop="username">
+            <el-input v-model="sysUser.username" />
+          </el-form-item>
+          <el-form-item v-if="!sysUser.id" label="密码" prop="password">
+            <el-input v-model="sysUser.password" type="password" />
+          </el-form-item>
+          <el-form-item label="姓名" prop="name">
+            <el-input v-model="sysUser.name" />
+          </el-form-item>
+          <el-form-item label="手机" prop="phone">
+            <el-input v-model="sysUser.phone" />
+          </el-form-item>
+        </el-form>
+        <span slot="footer" class="dialog-footer">
+          <el-button size="small" icon="el-icon-refresh-right" @click="dialogVisible = false">取 消</el-button>
+          <el-button type="primary" icon="el-icon-check" size="small" @click="saveOrUpdate()">确 定</el-button>
+        </span>
+      </el-dialog>
+    </div>
   </div>
 </template>
 
